@@ -68,80 +68,35 @@ func TestLogrusWithConfig(t *testing.T) {
 
 	res := b.String()
 
-	if !strings.Contains(res, "handle request") {
-		t.Error("invalid log: handle request info not found")
+	tests := []struct {
+		str string
+		err string
+	}{
+		{"handle request", "invalid log: handle request info not found"},
+		{"id=123", "invalid log: request id not found"},
+		{`remote_ip="http://foo.bar"`, "invalid log: remote ip not found"},
+		{`uri="http://some?name=john"`, "invalid log: uri not found"},
+		{"host=some", "invalid log: host not found"},
+		{"method=POST", "invalid log: method not found"},
+		{"status=200", "invalid log: status not found"},
+		{"latency=", "invalid log: latency not found"},
+		{"latency_human=", "invalid log: latency_human not found"},
+		{"bytes_in=0", "invalid log: bytes_in not found"},
+		{"bytes_out=4", "invalid log: bytes_out not found"},
+		{"path=/", "invalid log: path not found"},
+		{"protocol=HTTP/1.1", "invalid log: protocol not found"},
+		{`referer="http://foo.bar"`, "invalid log: referer not found"},
+		{"user_agent=cli-agent", "invalid log: user_agent not found"},
+		{"user=admin", "invalid log: header user not found"},
+		{"filter_name=john", "invalid log: query filter_name not found"},
+		{"username=doejohn", "invalid log: form field username not found"},
+		{"session=A1B2C3", "invalid log: cookie session not found"},
 	}
 
-	if !strings.Contains(res, "id=123") {
-		t.Error("invalid log: request id not found")
-	}
-
-	if !strings.Contains(res, `remote_ip="http://foo.bar"`) {
-		t.Error("invalid log: remote ip not found")
-	}
-
-	if !strings.Contains(res, `uri="http://some?name=john"`) {
-		t.Error("invalid log: uri not found")
-	}
-
-	if !strings.Contains(res, "host=some") {
-		t.Error("invalid log: host not found")
-	}
-
-	if !strings.Contains(res, "method=POST") {
-		t.Error("invalid log: method not found")
-	}
-
-	if !strings.Contains(res, "status=200") {
-		t.Error("invalid log: status not found")
-	}
-
-	if !strings.Contains(res, "latency=") {
-		t.Error("invalid log: latency not found")
-	}
-
-	if !strings.Contains(res, "latency_human=") {
-		t.Error("invalid log: latency_human not found")
-	}
-
-	if !strings.Contains(res, "bytes_in=0") {
-		t.Error("invalid log: bytes_in not found")
-	}
-
-	if !strings.Contains(res, "bytes_out=4") {
-		t.Error("invalid log: bytes_out not found")
-	}
-
-	if !strings.Contains(res, "path=/") {
-		t.Error("invalid log: path not found")
-	}
-
-	if !strings.Contains(res, "protocol=HTTP/1.1") {
-		t.Error("invalid log: protocol not found")
-	}
-
-	if !strings.Contains(res, `referer="http://foo.bar"`) {
-		t.Error("invalid log: referer not found")
-	}
-
-	if !strings.Contains(res, "user_agent=cli-agent") {
-		t.Error("invalid log: user_agent not found")
-	}
-
-	if !strings.Contains(res, "user=admin") {
-		t.Error("invalid log: header user not found")
-	}
-
-	if !strings.Contains(res, "filter_name=john") {
-		t.Error("invalid log: query filter_name not found")
-	}
-
-	if !strings.Contains(res, "username=doejohn") {
-		t.Error("invalid log: form field username not found")
-	}
-
-	if !strings.Contains(res, "session=A1B2C3") {
-		t.Error("invalid log: cookie session not found")
+	for _, test := range tests {
+		if !strings.Contains(res, test.str) {
+			t.Error(test.err)
+		}
 	}
 }
 
