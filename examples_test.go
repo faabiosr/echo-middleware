@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/sirupsen/logrus"
+	"go.opencensus.io/stats/view"
 )
 
 // This example registers the ZeroLog middleware with default configuration.
@@ -65,4 +66,26 @@ func ExampleLogrusWithConfig() {
 	}
 
 	e.Use(middleware.LogrusWithConfig(logConfig))
+}
+
+// This example registers the OpenCensus middleware with default configuration.
+func ExampleOpenCensus() {
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.OpenCensus())
+}
+
+// This example registers the OpenCensus middleware with custom configuration.
+func ExampleOpenCensusWithConfig() {
+	e := echo.New()
+
+	// Middleware
+	cfg := middleware.OpenCensusConfig{
+		Views: []*view.View{
+			middleware.OpenCensusRequestCount,
+		},
+	}
+
+	e.Use(middleware.OpenCensusWithConfig(cfg))
 }
