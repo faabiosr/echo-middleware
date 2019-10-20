@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	// OpenCensusRequestCount counts the HTTP requests started.
 	OpenCensusRequestCount = &view.View{
 		Name:        "request_count",
 		Description: "Count of HTTP request started",
@@ -18,6 +19,7 @@ var (
 		Aggregation: view.Count(),
 	}
 
+	// OpenCensusRequestCountByMethod counts the HTTP requests by method.
 	OpenCensusRequestCountByMethod = &view.View{
 		Name:        "request_count_by_method",
 		Description: "Server request count by HTTP method",
@@ -26,6 +28,7 @@ var (
 		Aggregation: view.Count(),
 	}
 
+	// OpenCensusRequestCountByPath counts the HTTP requests by path.
 	OpenCensusRequestCountByPath = &view.View{
 		Name:        "request_count_by_path",
 		Description: "Server request count by HTTP path",
@@ -34,6 +37,7 @@ var (
 		Aggregation: view.Count(),
 	}
 
+	// OpenCensusResponseCountByStatusCode counts the HTTP requests by status code.
 	OpenCensusResponseCountByStatusCode = &view.View{
 		Name:        "response_count_by_status_code",
 		Description: "Server response count by status code",
