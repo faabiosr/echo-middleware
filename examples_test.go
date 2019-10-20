@@ -17,7 +17,7 @@ func ExampleZeroLog() {
 	e.Use(middleware.ZeroLog())
 }
 
-// This examples registers the ZeroLog middleware with customer configuration.
+// This example registers the ZeroLog middleware with custom configuration.
 func ExampleZeroLogWithConfig() {
 	e := echo.New()
 
@@ -46,7 +46,7 @@ func ExampleLogrus() {
 	e.Use(middleware.Logrus())
 }
 
-// This examples registers the Logrus middleware with customer configuration.
+// This example registers the Logrus middleware with custom configuration.
 func ExampleLogrusWithConfig() {
 	e := echo.New()
 

@@ -1,2 +1,2 @@
-// Package echo-middleware provides middlewares for Echo Framework.
+// Package middleware provides middlewares for Echo Framework.
 package middleware
