@@ -7,12 +7,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/sirupsen/logrus"
 )
 
-// ZeroLogConfig defines the config for ZeroLog middleware.
-type ZeroLogConfig struct {
+// LogrusConfig defines the config for Logrus middleware.
+type LogrusConfig struct {
 	// FieldMap set a list of fields with tags
 	//
 	// Tags to constructed the logger fields.
@@ -38,15 +37,15 @@ type ZeroLogConfig struct {
 	// - @cookie:<NAME>
 	FieldMap map[string]string
 
-	// Logger it is a zerolog logger
-	Logger zerolog.Logger
+	// Logger it is a logrus logger
+	Logger logrus.FieldLogger
 
 	// Skipper defines a function to skip middleware.
 	Skipper mw.Skipper
 }
 
-// DefaultZeroLogConfig is the default ZeroLog middleware config.
-var DefaultZeroLogConfig = ZeroLogConfig{
+// DefaultLogrusConfig is the default Logrus middleware config.
+var DefaultLogrusConfig = LogrusConfig{
 	FieldMap: map[string]string{
 		"remote_ip": "@remote_ip",
 		"uri":       "@uri",
@@ -56,25 +55,29 @@ var DefaultZeroLogConfig = ZeroLogConfig{
 		"latency":   "@latency",
 		"error":     "@error",
 	},
-	Logger:  log.Logger,
+	Logger:  logrus.StandardLogger(),
 	Skipper: mw.DefaultSkipper,
 }
 
-// ZeroLog returns a middleware that logs HTTP requests.
-func ZeroLog() echo.MiddlewareFunc {
-	return ZeroLogWithConfig(DefaultZeroLogConfig)
+// Logrus returns a middleware that logs HTTP requests.
+func Logrus() echo.MiddlewareFunc {
+	return LogrusWithConfig(DefaultLogrusConfig)
 }
 
-// ZeroLogWithConfig returns a ZeroLog middleware with config.
-// See: `ZeroLog()`.
-func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
+// LogrusWithConfig returns a Logrus middleware with config.
+// See: `Logrus()`.
+func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 	// Defaults
 	if cfg.Skipper == nil {
-		cfg.Skipper = DefaultZeroLogConfig.Skipper
+		cfg.Skipper = DefaultLogrusConfig.Skipper
+	}
+
+	if cfg.Logger == nil {
+		cfg.Logger = DefaultLogrusConfig.Logger
 	}
 
 	if len(cfg.FieldMap) == 0 {
-		cfg.FieldMap = DefaultZeroLogConfig.FieldMap
+		cfg.FieldMap = DefaultLogrusConfig.FieldMap
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -92,7 +95,7 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 			}
 
 			stop := time.Now()
-			entry := cfg.Logger.Info()
+			entry := cfg.Logger
 
 			for k, v := range cfg.FieldMap {
 				if v == "" {
@@ -107,15 +110,15 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 						id = res.Header().Get(echo.HeaderXRequestID)
 					}
 
-					entry = entry.Str(k, id)
+					entry = entry.WithField(k, id)
 				case "@remote_ip":
-					entry = entry.Str(k, ctx.RealIP())
+					entry = entry.WithField(k, ctx.RealIP())
 				case "@uri":
-					entry = entry.Str(k, req.RequestURI)
+					entry = entry.WithField(k, req.RequestURI)
 				case "@host":
-					entry = entry.Str(k, req.Host)
+					entry = entry.WithField(k, req.Host)
 				case "@method":
-					entry = entry.Str(k, req.Method)
+					entry = entry.WithField(k, req.Method)
 				case "@path":
 					p := req.URL.Path
 
@@ -123,24 +126,24 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 						p = "/"
 					}
 
-					entry = entry.Str(k, p)
+					entry = entry.WithField(k, p)
 				case "@protocol":
-					entry = entry.Str(k, req.Proto)
+					entry = entry.WithField(k, req.Proto)
 				case "@referer":
-					entry = entry.Str(k, req.Referer())
+					entry = entry.WithField(k, req.Referer())
 				case "@user_agent":
-					entry = entry.Str(k, req.UserAgent())
+					entry = entry.WithField(k, req.UserAgent())
 				case "@status":
-					entry = entry.Int(k, res.Status)
+					entry = entry.WithField(k, res.Status)
 				case "@error":
 					if err != nil {
-						entry = entry.Err(err)
+						entry = entry.WithField(k, err)
 					}
 				case "@latency":
 					l := stop.Sub(start)
-					entry = entry.Str(k, strconv.FormatInt(int64(l), 10))
+					entry = entry.WithField(k, strconv.FormatInt(int64(l), 10))
 				case "@latency_human":
-					entry = entry.Str(k, stop.Sub(start).String())
+					entry = entry.WithField(k, stop.Sub(start).String())
 				case "@bytes_in":
 					cl := req.Header.Get(echo.HeaderContentLength)
 
@@ -148,27 +151,27 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 						cl = "0"
 					}
 
-					entry = entry.Str(k, cl)
+					entry = entry.WithField(k, cl)
 				case "@bytes_out":
-					entry = entry.Str(k, strconv.FormatInt(res.Size, 10))
+					entry = entry.WithField(k, strconv.FormatInt(res.Size, 10))
 				default:
 					switch {
 					case strings.HasPrefix(v, "@header:"):
-						entry = entry.Str(k, ctx.Request().Header.Get(v[8:]))
+						entry = entry.WithField(k, ctx.Request().Header.Get(v[8:]))
 					case strings.HasPrefix(v, "@query:"):
-						entry = entry.Str(k, ctx.QueryParam(v[7:]))
+						entry = entry.WithField(k, ctx.QueryParam(v[7:]))
 					case strings.HasPrefix(v, "@form:"):
-						entry = entry.Str(k, ctx.FormValue(v[6:]))
+						entry = entry.WithField(k, ctx.FormValue(v[6:]))
 					case strings.HasPrefix(v, "@cookie:"):
 						cookie, err := ctx.Cookie(v[8:])
 						if err == nil {
-							entry = entry.Str(k, cookie.Value)
+							entry = entry.WithField(k, cookie.Value)
 						}
 					}
 				}
 			}
 
-			entry.Msg("handle request")
+			entry.Print("handle request")
 
 			return
 		}
