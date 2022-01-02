@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"strconv"
 	"strings"
 	"time"
 
@@ -47,13 +46,13 @@ type LogrusConfig struct {
 // DefaultLogrusConfig is the default Logrus middleware config.
 var DefaultLogrusConfig = LogrusConfig{
 	FieldMap: map[string]string{
-		"remote_ip": "@remote_ip",
-		"uri":       "@uri",
-		"host":      "@host",
-		"method":    "@method",
-		"status":    "@status",
-		"latency":   "@latency",
-		"error":     "@error",
+		"remote_ip": logRemoteIP,
+		"uri":       logURI,
+		"host":      logHost,
+		"method":    logMethod,
+		"status":    logStatus,
+		"latency":   logLatency,
+		"error":     logError,
 	},
 	Logger:  logrus.StandardLogger(),
 	Skipper: mw.DefaultSkipper,
@@ -86,8 +85,6 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 				return next(ctx)
 			}
 
-			req := ctx.Request()
-			res := ctx.Response()
 			start := time.Now()
 
 			if err = next(ctx); err != nil {
@@ -95,78 +92,35 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 			}
 
 			stop := time.Now()
-			entry := cfg.Logger
+			latency := stop.Sub(start)
 
-			for k, v := range cfg.FieldMap {
-				if v == "" {
+			entry := cfg.Logger
+			tags := mapTags(ctx, latency)
+
+			for k, tag := range cfg.FieldMap {
+				if tag == "" {
 					continue
 				}
 
-				switch v {
-				case "@id":
-					id := req.Header.Get(echo.HeaderXRequestID)
+				if value, ok := tags[tag]; ok {
+					entry = entry.WithField(k, value)
+					continue
+				}
 
-					if id == "" {
-						id = res.Header().Get(echo.HeaderXRequestID)
-					}
+				if tag == logError && err != nil {
+					entry = entry.WithField(k, err)
+					continue
+				}
 
-					entry = entry.WithField(k, id)
-				case "@remote_ip":
-					entry = entry.WithField(k, ctx.RealIP())
-				case "@uri":
-					entry = entry.WithField(k, req.RequestURI)
-				case "@host":
-					entry = entry.WithField(k, req.Host)
-				case "@method":
-					entry = entry.WithField(k, req.Method)
-				case "@path":
-					p := req.URL.Path
+				if strings.HasPrefix(tag, logHeader+":") {
+					entry = entry.WithField(k, ctx.Request().Header.Get(tag[8:]))
+					continue
+				}
 
-					if p == "" {
-						p = "/"
-					}
-
-					entry = entry.WithField(k, p)
-				case "@protocol":
-					entry = entry.WithField(k, req.Proto)
-				case "@referer":
-					entry = entry.WithField(k, req.Referer())
-				case "@user_agent":
-					entry = entry.WithField(k, req.UserAgent())
-				case "@status":
-					entry = entry.WithField(k, res.Status)
-				case "@error":
-					if err != nil {
-						entry = entry.WithField(k, err)
-					}
-				case "@latency":
-					l := stop.Sub(start)
-					entry = entry.WithField(k, strconv.FormatInt(int64(l), 10))
-				case "@latency_human":
-					entry = entry.WithField(k, stop.Sub(start).String())
-				case "@bytes_in":
-					cl := req.Header.Get(echo.HeaderContentLength)
-
-					if cl == "" {
-						cl = "0"
-					}
-
-					entry = entry.WithField(k, cl)
-				case "@bytes_out":
-					entry = entry.WithField(k, strconv.FormatInt(res.Size, 10))
-				default:
-					switch {
-					case strings.HasPrefix(v, "@header:"):
-						entry = entry.WithField(k, ctx.Request().Header.Get(v[8:]))
-					case strings.HasPrefix(v, "@query:"):
-						entry = entry.WithField(k, ctx.QueryParam(v[7:]))
-					case strings.HasPrefix(v, "@form:"):
-						entry = entry.WithField(k, ctx.FormValue(v[6:]))
-					case strings.HasPrefix(v, "@cookie:"):
-						cookie, err := ctx.Cookie(v[8:])
-						if err == nil {
-							entry = entry.WithField(k, cookie.Value)
-						}
+				if strings.HasPrefix(tag, logCookie+":") {
+					cookie, err := ctx.Cookie(tag[8:])
+					if err == nil {
+						entry = entry.WithField(k, cookie.Value)
 					}
 				}
 			}

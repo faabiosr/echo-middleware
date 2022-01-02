@@ -21,6 +21,11 @@ fmt:
 	@gofmt -s -w -l $(shell go list -f {{.Dir}} ./...)
 .PHONY: fmt
 
+# Run linters
+lint:
+	@golangci-lint run ./...
+.PHONY: lint
+
 # Run tests
 test:
 	@go test -v -coverprofile=./cover.out -covermode=atomic $(shell go list ./...)

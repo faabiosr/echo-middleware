@@ -42,27 +42,27 @@ func TestZeroLogWithConfig(t *testing.T) {
 
 	fields := DefaultZeroLogConfig.FieldMap
 	fields["empty"] = ""
-	fields["id"] = "@id"
-	fields["path"] = "@path"
-	fields["protocol"] = "@protocol"
-	fields["referer"] = "@referer"
-	fields["user_agent"] = "@user_agent"
-	fields["store"] = "@header:store"
-	fields["filter_name"] = "@query:name"
-	fields["username"] = "@form:username"
-	fields["session"] = "@cookie:session"
-	fields["latency_human"] = "@latency_human"
-	fields["bytes_in"] = "@bytes_in"
-	fields["bytes_out"] = "@bytes_out"
-	fields["referer"] = "@referer"
-	fields["user"] = "@header:user"
+	fields["id"] = logID
+	fields["path"] = logPath
+	fields["protocol"] = logProtocol
+	fields["referer"] = logReferer
+	fields["user_agent"] = logUserAgent
+	fields["store"] = logHeader + ":store"
+	fields["filter_name"] = logQuery + ":name"
+	fields["username"] = logForm + ":username"
+	fields["session"] = logCookie + ":session"
+	fields["latency_human"] = logLatencyHuman
+	fields["bytes_in"] = logBytesIn
+	fields["bytes_out"] = logBytesOut
+	fields["referer"] = logReferer
+	fields["user"] = logHeader + ":user"
 
 	config := ZeroLogConfig{
 		Logger:   logger,
 		FieldMap: fields,
 	}
 
-	ZeroLogWithConfig(config)(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 
@@ -106,7 +106,7 @@ func TestZeroLog(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	ZeroLog()(func(c echo.Context) error {
+	_ = ZeroLog()(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -117,7 +117,7 @@ func TestZeroLogWithEmptyConfig(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	ZeroLogWithConfig(ZeroLogConfig{})(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(ZeroLogConfig{})(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -133,7 +133,7 @@ func TestZeroLogWithSkipper(t *testing.T) {
 		return true
 	}
 
-	ZeroLogWithConfig(config)(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -151,7 +151,7 @@ func TestZeroLogRetrievesAnError(t *testing.T) {
 		Logger: logger,
 	}
 
-	ZeroLogWithConfig(config)(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
 		return errors.New("error")
 	})(c)
 
