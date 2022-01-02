@@ -1,20 +1,18 @@
 # Echo Framework - Middlewares
 
-[![Build Status](https://img.shields.io/travis/faabiosr/echo-middleware/master.svg?style=flat-square)](https://travis-ci.org/faabiosr/echo-middleware)
+[![Build Status](https://img.shields.io/github/workflow/status/faabiosr/echo-middleware/test?style=flat-square&logo=github)](https://github.com/faabiosr/echo-middleware/actions?query=workflow:test)
 [![Codecov branch](https://img.shields.io/codecov/c/github/faabiosr/echo-middleware/master.svg?style=flat-square)](https://codecov.io/gh/faabiosr/echo-middleware)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/faabiosr/echo-middleware)
 [![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/echo-middleware?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/echo-middleware)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/echo-middleware/blob/master/LICENSE)
 
 ## Description
-
 echo-middleware is a Go package that provides multiple middleware for Echo Framework.
 
 ## Requirements
 Echo Middlewares requires Go 1.12 or later and Echo Framework v4.
 
 ## Instalation
-
 Use go get.
 ```sh
 $ go get github.com/faabiosr/echo-middleware
@@ -28,7 +26,6 @@ import "github.com/faabiosr/echo-middleware"
 ## Development
 
 ### Requirements
-
 - Install [Go](https://golang.org)
 
 ### Makefile
@@ -50,5 +47,4 @@ $make test
 ```
 
 ## License
-
 This project is released under the MIT licence. See [LICENSE](https://github.com/faabiosr/echo-middleware/blob/master/LICENSE) for more details.
