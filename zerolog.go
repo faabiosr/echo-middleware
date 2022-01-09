@@ -1,10 +1,6 @@
 package middleware
 
 import (
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -83,92 +79,11 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 				return next(ctx)
 			}
 
-			req := ctx.Request()
-			res := ctx.Response()
-			start := time.Now()
+			logFields, err := mapFields(ctx, next, cfg.FieldMap)
 
-			if err = next(ctx); err != nil {
-				ctx.Error(err)
-			}
-
-			stop := time.Now()
-			entry := cfg.Logger.Info()
-
-			for k, v := range cfg.FieldMap {
-				if v == "" {
-					continue
-				}
-
-				switch v {
-				case logID:
-					id := req.Header.Get(echo.HeaderXRequestID)
-
-					if id == "" {
-						id = res.Header().Get(echo.HeaderXRequestID)
-					}
-
-					entry = entry.Str(k, id)
-				case logRemoteIP:
-					entry = entry.Str(k, ctx.RealIP())
-				case logURI:
-					entry = entry.Str(k, req.RequestURI)
-				case logHost:
-					entry = entry.Str(k, req.Host)
-				case logMethod:
-					entry = entry.Str(k, req.Method)
-				case logPath:
-					p := req.URL.Path
-
-					if p == "" {
-						p = "/"
-					}
-
-					entry = entry.Str(k, p)
-				case logProtocol:
-					entry = entry.Str(k, req.Proto)
-				case logReferer:
-					entry = entry.Str(k, req.Referer())
-				case logUserAgent:
-					entry = entry.Str(k, req.UserAgent())
-				case logStatus:
-					entry = entry.Int(k, res.Status)
-				case logError:
-					if err != nil {
-						entry = entry.Err(err)
-					}
-				case logLatency:
-					l := stop.Sub(start)
-					entry = entry.Str(k, strconv.FormatInt(int64(l), 10))
-				case logLatencyHuman:
-					entry = entry.Str(k, stop.Sub(start).String())
-				case logBytesIn:
-					cl := req.Header.Get(echo.HeaderContentLength)
-
-					if cl == "" {
-						cl = "0"
-					}
-
-					entry = entry.Str(k, cl)
-				case logBytesOut:
-					entry = entry.Str(k, strconv.FormatInt(res.Size, 10))
-				default:
-					switch {
-					case strings.HasPrefix(v, logHeaderPrefix):
-						entry = entry.Str(k, ctx.Request().Header.Get(v[8:]))
-					case strings.HasPrefix(v, logQueryPrefix):
-						entry = entry.Str(k, ctx.QueryParam(v[7:]))
-					case strings.HasPrefix(v, logFormPrefix):
-						entry = entry.Str(k, ctx.FormValue(v[6:]))
-					case strings.HasPrefix(v, logCookiePrefix):
-						cookie, err := ctx.Cookie(v[8:])
-						if err == nil {
-							entry = entry.Str(k, cookie.Value)
-						}
-					}
-				}
-			}
-
-			entry.Msg("handle request")
+			cfg.Logger.Info().
+				Fields(logFields).
+				Msg("handle request")
 
 			return
 		}
