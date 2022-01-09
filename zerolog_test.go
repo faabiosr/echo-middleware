@@ -42,20 +42,20 @@ func TestZeroLogWithConfig(t *testing.T) {
 
 	fields := DefaultZeroLogConfig.FieldMap
 	fields["empty"] = ""
-	fields["id"] = "@id"
-	fields["path"] = "@path"
-	fields["protocol"] = "@protocol"
-	fields["referer"] = "@referer"
-	fields["user_agent"] = "@user_agent"
-	fields["store"] = "@header:store"
-	fields["filter_name"] = "@query:name"
-	fields["username"] = "@form:username"
-	fields["session"] = "@cookie:session"
-	fields["latency_human"] = "@latency_human"
-	fields["bytes_in"] = "@bytes_in"
-	fields["bytes_out"] = "@bytes_out"
-	fields["referer"] = "@referer"
-	fields["user"] = "@header:user"
+	fields["id"] = logID
+	fields["path"] = logPath
+	fields["protocol"] = logProtocol
+	fields["referer"] = logReferer
+	fields["user_agent"] = logUserAgent
+	fields["store"] = logHeaderPrefix + "store"
+	fields["filter_name"] = logQueryPrefix + "name"
+	fields["username"] = logFormPrefix + "username"
+	fields["session"] = logCookiePrefix + "session"
+	fields["latency_human"] = logLatencyHuman
+	fields["bytes_in"] = logBytesIn
+	fields["bytes_out"] = logBytesOut
+	fields["referer"] = logReferer
+	fields["user"] = logHeaderPrefix + "user"
 
 	config := ZeroLogConfig{
 		Logger:   logger,

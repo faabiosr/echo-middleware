@@ -48,13 +48,13 @@ type ZeroLogConfig struct {
 // DefaultZeroLogConfig is the default ZeroLog middleware config.
 var DefaultZeroLogConfig = ZeroLogConfig{
 	FieldMap: map[string]string{
-		"remote_ip": "@remote_ip",
-		"uri":       "@uri",
-		"host":      "@host",
-		"method":    "@method",
-		"status":    "@status",
-		"latency":   "@latency",
-		"error":     "@error",
+		"remote_ip": logRemoteIP,
+		"uri":       logURI,
+		"host":      logHost,
+		"method":    logMethod,
+		"status":    logStatus,
+		"latency":   logLatency,
+		"error":     logError,
 	},
 	Logger:  log.Logger,
 	Skipper: mw.DefaultSkipper,
@@ -100,7 +100,7 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 				}
 
 				switch v {
-				case "@id":
+				case logID:
 					id := req.Header.Get(echo.HeaderXRequestID)
 
 					if id == "" {
@@ -108,15 +108,15 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 					}
 
 					entry = entry.Str(k, id)
-				case "@remote_ip":
+				case logRemoteIP:
 					entry = entry.Str(k, ctx.RealIP())
-				case "@uri":
+				case logURI:
 					entry = entry.Str(k, req.RequestURI)
-				case "@host":
+				case logHost:
 					entry = entry.Str(k, req.Host)
-				case "@method":
+				case logMethod:
 					entry = entry.Str(k, req.Method)
-				case "@path":
+				case logPath:
 					p := req.URL.Path
 
 					if p == "" {
@@ -124,24 +124,24 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 					}
 
 					entry = entry.Str(k, p)
-				case "@protocol":
+				case logProtocol:
 					entry = entry.Str(k, req.Proto)
-				case "@referer":
+				case logReferer:
 					entry = entry.Str(k, req.Referer())
-				case "@user_agent":
+				case logUserAgent:
 					entry = entry.Str(k, req.UserAgent())
-				case "@status":
+				case logStatus:
 					entry = entry.Int(k, res.Status)
-				case "@error":
+				case logError:
 					if err != nil {
 						entry = entry.Err(err)
 					}
-				case "@latency":
+				case logLatency:
 					l := stop.Sub(start)
 					entry = entry.Str(k, strconv.FormatInt(int64(l), 10))
-				case "@latency_human":
+				case logLatencyHuman:
 					entry = entry.Str(k, stop.Sub(start).String())
-				case "@bytes_in":
+				case logBytesIn:
 					cl := req.Header.Get(echo.HeaderContentLength)
 
 					if cl == "" {
@@ -149,17 +149,17 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 					}
 
 					entry = entry.Str(k, cl)
-				case "@bytes_out":
+				case logBytesOut:
 					entry = entry.Str(k, strconv.FormatInt(res.Size, 10))
 				default:
 					switch {
-					case strings.HasPrefix(v, "@header:"):
+					case strings.HasPrefix(v, logHeaderPrefix):
 						entry = entry.Str(k, ctx.Request().Header.Get(v[8:]))
-					case strings.HasPrefix(v, "@query:"):
+					case strings.HasPrefix(v, logQueryPrefix):
 						entry = entry.Str(k, ctx.QueryParam(v[7:]))
-					case strings.HasPrefix(v, "@form:"):
+					case strings.HasPrefix(v, logFormPrefix):
 						entry = entry.Str(k, ctx.FormValue(v[6:]))
-					case strings.HasPrefix(v, "@cookie:"):
+					case strings.HasPrefix(v, logCookiePrefix):
 						cookie, err := ctx.Cookie(v[8:])
 						if err == nil {
 							entry = entry.Str(k, cookie.Value)
