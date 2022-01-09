@@ -60,7 +60,7 @@ func TestOpenCensusWithWrongView(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	config := OpenCensusConfig{
-		Views: []*view.View{&view.View{}},
+		Views: []*view.View{{}},
 	}
 
 	OpenCensusWithConfig(config)(func(c echo.Context) error {
