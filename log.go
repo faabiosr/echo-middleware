@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -32,6 +33,55 @@ const (
 
 // string to int base conversion.
 const base = 10
+
+// mapFields maps fields based on tag name.
+func mapFields(ec echo.Context, h echo.HandlerFunc, fm map[string]string) (map[string]interface{}, error) {
+	logFields := map[string]interface{}{}
+	start := time.Now()
+
+	err := h(ec)
+	if err != nil {
+		ec.Error(err)
+	}
+
+	elapsed := time.Since(start)
+	tags := mapTags(ec, elapsed)
+
+	if err != nil {
+		tags[logError] = err
+	}
+
+	for k, tag := range fm {
+		if tag == "" {
+			continue
+		}
+
+		if value, ok := tags[tag]; ok {
+			logFields[k] = value
+			continue
+		}
+
+		switch {
+		case strings.HasPrefix(tag, logHeaderPrefix):
+			key := tag[len(logHeaderPrefix):]
+			logFields[k] = ec.Request().Header.Get(key)
+		case strings.HasPrefix(tag, logQueryPrefix):
+			key := tag[len(logQueryPrefix):]
+			logFields[k] = ec.QueryParam(key)
+		case strings.HasPrefix(tag, logFormPrefix):
+			key := tag[len(logFormPrefix):]
+			logFields[k] = ec.FormValue(key)
+		case strings.HasPrefix(tag, logCookiePrefix):
+			key := tag[len(logCookiePrefix):]
+			cookie, err := ec.Cookie(key)
+			if err == nil {
+				logFields[k] = cookie.Value
+			}
+		}
+	}
+
+	return logFields, err
+}
 
 // mapTags maps the log tags with its related data. Populate previously the
 // key/value avoids the cyclomatic complexity of the log middlewares to

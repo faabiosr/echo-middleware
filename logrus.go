@@ -1,9 +1,6 @@
 package middleware
 
 import (
-	"strings"
-	"time"
-
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -85,50 +82,8 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 				return next(ctx)
 			}
 
-			start := time.Now()
-
-			if err = next(ctx); err != nil {
-				ctx.Error(err)
-			}
-
-			stop := time.Now()
-			entry := cfg.Logger
-
-			tags := mapTags(ctx, stop.Sub(start))
-
-			for k, v := range cfg.FieldMap {
-				if v == "" {
-					continue
-				}
-
-				if value, ok := tags[v]; ok {
-					entry = entry.WithField(k, value)
-					continue
-				}
-
-				switch v {
-				case logError:
-					if err != nil {
-						entry = entry.WithField(k, err)
-					}
-				default:
-					switch {
-					case strings.HasPrefix(v, logHeaderPrefix):
-						entry = entry.WithField(k, ctx.Request().Header.Get(v[8:]))
-					case strings.HasPrefix(v, logQueryPrefix):
-						entry = entry.WithField(k, ctx.QueryParam(v[7:]))
-					case strings.HasPrefix(v, logFormPrefix):
-						entry = entry.WithField(k, ctx.FormValue(v[6:]))
-					case strings.HasPrefix(v, logCookiePrefix):
-						cookie, err := ctx.Cookie(v[8:])
-						if err == nil {
-							entry = entry.WithField(k, cookie.Value)
-						}
-					}
-				}
-			}
-
-			entry.Print("handle request")
+			logFields, err := mapFields(ctx, next, cfg.FieldMap)
+			cfg.Logger.WithFields(logFields).Print("handle request")
 
 			return
 		}
