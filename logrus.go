@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"strconv"
 	"strings"
 	"time"
 
@@ -86,8 +85,6 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 				return next(ctx)
 			}
 
-			req := ctx.Request()
-			res := ctx.Response()
 			start := time.Now()
 
 			if err = next(ctx); err != nil {
@@ -97,63 +94,23 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 			stop := time.Now()
 			entry := cfg.Logger
 
+			tags := mapTags(ctx, stop.Sub(start))
+
 			for k, v := range cfg.FieldMap {
 				if v == "" {
 					continue
 				}
 
+				if value, ok := tags[v]; ok {
+					entry = entry.WithField(k, value)
+					continue
+				}
+
 				switch v {
-				case logID:
-					id := req.Header.Get(echo.HeaderXRequestID)
-
-					if id == "" {
-						id = res.Header().Get(echo.HeaderXRequestID)
-					}
-
-					entry = entry.WithField(k, id)
-				case logRemoteIP:
-					entry = entry.WithField(k, ctx.RealIP())
-				case logURI:
-					entry = entry.WithField(k, req.RequestURI)
-				case logHost:
-					entry = entry.WithField(k, req.Host)
-				case logMethod:
-					entry = entry.WithField(k, req.Method)
-				case logPath:
-					p := req.URL.Path
-
-					if p == "" {
-						p = "/"
-					}
-
-					entry = entry.WithField(k, p)
-				case logProtocol:
-					entry = entry.WithField(k, req.Proto)
-				case logReferer:
-					entry = entry.WithField(k, req.Referer())
-				case logUserAgent:
-					entry = entry.WithField(k, req.UserAgent())
-				case logStatus:
-					entry = entry.WithField(k, res.Status)
 				case logError:
 					if err != nil {
 						entry = entry.WithField(k, err)
 					}
-				case logLatency:
-					l := stop.Sub(start)
-					entry = entry.WithField(k, strconv.FormatInt(int64(l), 10))
-				case logLatencyHuman:
-					entry = entry.WithField(k, stop.Sub(start).String())
-				case logBytesIn:
-					cl := req.Header.Get(echo.HeaderContentLength)
-
-					if cl == "" {
-						cl = "0"
-					}
-
-					entry = entry.WithField(k, cl)
-				case logBytesOut:
-					entry = entry.WithField(k, strconv.FormatInt(res.Size, 10))
 				default:
 					switch {
 					case strings.HasPrefix(v, logHeaderPrefix):
