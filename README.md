@@ -10,7 +10,7 @@
 echo-middleware is a Go package that provides multiple middleware for Echo Framework.
 
 ## Requirements
-Echo Middlewares requires Go 1.12 or later and Echo Framework v4.
+Echo Middlewares requires Go 1.15 or later and Echo Framework v4.
 
 ## Instalation
 Use go get.
