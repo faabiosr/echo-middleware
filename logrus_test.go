@@ -62,7 +62,7 @@ func TestLogrusWithConfig(t *testing.T) {
 		FieldMap: fields,
 	}
 
-	LogrusWithConfig(config)(func(c echo.Context) error {
+	_ = LogrusWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 
@@ -106,7 +106,7 @@ func TestLogrus(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	Logrus()(func(c echo.Context) error {
+	_ = Logrus()(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -117,7 +117,7 @@ func TestLogrusWithEmptyConfig(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	LogrusWithConfig(LogrusConfig{})(func(c echo.Context) error {
+	_ = LogrusWithConfig(LogrusConfig{})(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -133,7 +133,7 @@ func TestLogrusWithSkipper(t *testing.T) {
 		return true
 	}
 
-	LogrusWithConfig(config)(func(c echo.Context) error {
+	_ = LogrusWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -152,7 +152,7 @@ func TestLogrusRetrievesAnError(t *testing.T) {
 		Logger: logger,
 	}
 
-	LogrusWithConfig(config)(func(c echo.Context) error {
+	_ = LogrusWithConfig(config)(func(c echo.Context) error {
 		return errors.New("error")
 	})(c)
 

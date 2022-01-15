@@ -15,7 +15,7 @@ func TestOpenCensus(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	OpenCensus()(func(c echo.Context) error {
+	_ = OpenCensus()(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -26,7 +26,7 @@ func TestOpenCensusWithEmptyConfig(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	OpenCensusWithConfig(OpenCensusConfig{})(func(c echo.Context) error {
+	_ = OpenCensusWithConfig(OpenCensusConfig{})(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -42,7 +42,7 @@ func TestOpenCensusWithSkipper(t *testing.T) {
 		return true
 	}
 
-	OpenCensusWithConfig(config)(func(c echo.Context) error {
+	_ = OpenCensusWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -63,7 +63,7 @@ func TestOpenCensusWithWrongView(t *testing.T) {
 		Views: []*view.View{{}},
 	}
 
-	OpenCensusWithConfig(config)(func(c echo.Context) error {
+	_ = OpenCensusWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }

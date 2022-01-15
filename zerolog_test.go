@@ -62,7 +62,7 @@ func TestZeroLogWithConfig(t *testing.T) {
 		FieldMap: fields,
 	}
 
-	ZeroLogWithConfig(config)(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 
@@ -106,7 +106,7 @@ func TestZeroLog(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	ZeroLog()(func(c echo.Context) error {
+	_ = ZeroLog()(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -117,7 +117,7 @@ func TestZeroLogWithEmptyConfig(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	ZeroLogWithConfig(ZeroLogConfig{})(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(ZeroLogConfig{})(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -133,7 +133,7 @@ func TestZeroLogWithSkipper(t *testing.T) {
 		return true
 	}
 
-	ZeroLogWithConfig(config)(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
 		return c.String(http.StatusOK, "test")
 	})(c)
 }
@@ -151,7 +151,7 @@ func TestZeroLogRetrievesAnError(t *testing.T) {
 		Logger: logger,
 	}
 
-	ZeroLogWithConfig(config)(func(c echo.Context) error {
+	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
 		return errors.New("error")
 	})(c)
 
