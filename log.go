@@ -31,6 +31,16 @@ const (
 	logCookiePrefix = "@cookie:"
 )
 
+var defaultFields = map[string]string{
+	"remote_ip": logRemoteIP,
+	"uri":       logURI,
+	"host":      logHost,
+	"method":    logMethod,
+	"status":    logStatus,
+	"latency":   logLatency,
+	"error":     logError,
+}
+
 // string to int base conversion.
 const base = 10
 

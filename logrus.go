@@ -42,17 +42,9 @@ type LogrusConfig struct {
 
 // DefaultLogrusConfig is the default Logrus middleware config.
 var DefaultLogrusConfig = LogrusConfig{
-	FieldMap: map[string]string{
-		"remote_ip": logRemoteIP,
-		"uri":       logURI,
-		"host":      logHost,
-		"method":    logMethod,
-		"status":    logStatus,
-		"latency":   logLatency,
-		"error":     logError,
-	},
-	Logger:  logrus.StandardLogger(),
-	Skipper: mw.DefaultSkipper,
+	FieldMap: defaultFields,
+	Logger:   logrus.StandardLogger(),
+	Skipper:  mw.DefaultSkipper,
 }
 
 // Logrus returns a middleware that logs HTTP requests.
