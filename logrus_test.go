@@ -2,10 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"errors"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -14,59 +10,18 @@ import (
 )
 
 func TestLogrusWithConfig(t *testing.T) {
-	e := echo.New()
-
-	form := url.Values{}
-	form.Add("username", "doejohn")
-
-	req := httptest.NewRequest(echo.POST, "http://some?name=john", strings.NewReader(form.Encode()))
-
-	req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationForm)
-	req.Header.Add("Referer", "http://foo.bar")
-	req.Header.Add("User-Agent", "cli-agent")
-	req.Header.Add(echo.HeaderXForwardedFor, "http://foo.bar")
-	req.Header.Add("user", "admin")
-	req.AddCookie(&http.Cookie{
-		Name:  "session",
-		Value: "A1B2C3",
-	})
-
-	rec := httptest.NewRecorder()
-	rec.Header().Add(echo.HeaderXRequestID, "123")
-
-	c := e.NewContext(req, rec)
+	ec := postCtx(t)
 	b := new(bytes.Buffer)
 
 	logger := logrus.StandardLogger()
 	logger.Out = b
 
-	fields := DefaultLogrusConfig.FieldMap
-	fields["empty"] = ""
-	fields["id"] = logID
-	fields["path"] = logPath
-	fields["protocol"] = logProtocol
-	fields["referer"] = logReferer
-	fields["user_agent"] = logUserAgent
-	fields["store"] = logHeaderPrefix + "store"
-	fields["filter_name"] = logQueryPrefix + "name"
-	fields["username"] = logFormPrefix + "username"
-	fields["session"] = logCookiePrefix + "session"
-	fields["latency_human"] = logLatencyHuman
-	fields["bytes_in"] = logBytesIn
-	fields["bytes_out"] = logBytesOut
-	fields["referer"] = logReferer
-	fields["user"] = logHeaderPrefix + "user"
-
 	config := LogrusConfig{
 		Logger:   logger,
-		FieldMap: fields,
+		FieldMap: testFields,
 	}
 
-	_ = LogrusWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
-
-	res := b.String()
+	_ = LogrusWithConfig(config)(testHandler)(ec)
 
 	tests := []struct {
 		str string
@@ -94,55 +49,35 @@ func TestLogrusWithConfig(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if !strings.Contains(res, test.str) {
+		if !strings.Contains(b.String(), test.str) {
 			t.Error(test.err)
 		}
 	}
 }
 
 func TestLogrus(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	_ = Logrus()(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	ec := reqCtx(t)
+	_ = Logrus()(testHandler)(ec)
 }
 
 func TestLogrusWithEmptyConfig(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	_ = LogrusWithConfig(LogrusConfig{})(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	ec := reqCtx(t)
+	_ = LogrusWithConfig(LogrusConfig{})(testHandler)(ec)
 }
 
 func TestLogrusWithSkipper(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
 	config := DefaultLogrusConfig
 	config.Skipper = func(c echo.Context) bool {
 		return true
 	}
 
-	_ = LogrusWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = LogrusWithConfig(config)(testHandler)(ec)
 }
 
 func TestLogrusRetrievesAnError(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := errCtx(t)
 	b := new(bytes.Buffer)
 
 	logger := logrus.StandardLogger()
@@ -152,9 +87,7 @@ func TestLogrusRetrievesAnError(t *testing.T) {
 		Logger: logger,
 	}
 
-	_ = LogrusWithConfig(config)(func(c echo.Context) error {
-		return errors.New("error")
-	})(c)
+	_ = LogrusWithConfig(config)(testHandler)(ec)
 
 	res := b.String()
 

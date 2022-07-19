@@ -2,10 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"errors"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -15,58 +11,16 @@ import (
 )
 
 func TestZeroLogWithConfig(t *testing.T) {
-	e := echo.New()
-
-	form := url.Values{}
-	form.Add("username", "doejohn")
-
-	req := httptest.NewRequest(echo.POST, "http://some?name=john", strings.NewReader(form.Encode()))
-
-	req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationForm)
-	req.Header.Add("Referer", "http://foo.bar")
-	req.Header.Add("User-Agent", "cli-agent")
-	req.Header.Add(echo.HeaderXForwardedFor, "http://foo.bar")
-	req.Header.Add("user", "admin")
-	req.AddCookie(&http.Cookie{
-		Name:  "session",
-		Value: "A1B2C3",
-	})
-
-	rec := httptest.NewRecorder()
-	rec.Header().Add(echo.HeaderXRequestID, "123")
-
-	c := e.NewContext(req, rec)
+	ec := postCtx(t)
 	b := new(bytes.Buffer)
-
 	logger := log.Output(zerolog.ConsoleWriter{Out: b, NoColor: true})
-
-	fields := DefaultZeroLogConfig.FieldMap
-	fields["empty"] = ""
-	fields["id"] = logID
-	fields["path"] = logPath
-	fields["protocol"] = logProtocol
-	fields["referer"] = logReferer
-	fields["user_agent"] = logUserAgent
-	fields["store"] = logHeaderPrefix + "store"
-	fields["filter_name"] = logQueryPrefix + "name"
-	fields["username"] = logFormPrefix + "username"
-	fields["session"] = logCookiePrefix + "session"
-	fields["latency_human"] = logLatencyHuman
-	fields["bytes_in"] = logBytesIn
-	fields["bytes_out"] = logBytesOut
-	fields["referer"] = logReferer
-	fields["user"] = logHeaderPrefix + "user"
 
 	config := ZeroLogConfig{
 		Logger:   logger,
-		FieldMap: fields,
+		FieldMap: testFields,
 	}
 
-	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
-
-	res := b.String()
+	_ = ZeroLogWithConfig(config)(testHandler)(ec)
 
 	tests := []struct {
 		str string
@@ -94,66 +48,43 @@ func TestZeroLogWithConfig(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if !strings.Contains(res, test.str) {
+		if !strings.Contains(b.String(), test.str) {
 			t.Error(test.err)
 		}
 	}
 }
 
 func TestZeroLog(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	_ = ZeroLog()(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	ec := reqCtx(t)
+	_ = ZeroLog()(testHandler)(ec)
 }
 
 func TestZeroLogWithEmptyConfig(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	_ = ZeroLogWithConfig(ZeroLogConfig{})(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	ec := reqCtx(t)
+	_ = ZeroLogWithConfig(ZeroLogConfig{})(testHandler)(ec)
 }
 
 func TestZeroLogWithSkipper(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
 	config := DefaultZeroLogConfig
 	config.Skipper = func(c echo.Context) bool {
 		return true
 	}
 
-	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = ZeroLogWithConfig(config)(testHandler)(ec)
 }
 
 func TestZeroLogRetrievesAnError(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := errCtx(t)
 	b := new(bytes.Buffer)
-
 	logger := log.Output(zerolog.ConsoleWriter{Out: b, NoColor: true})
 
 	config := ZeroLogConfig{
 		Logger: logger,
 	}
 
-	_ = ZeroLogWithConfig(config)(func(c echo.Context) error {
-		return errors.New("error")
-	})(c)
+	_ = ZeroLogWithConfig(config)(testHandler)(ec)
 
 	res := b.String()
 
