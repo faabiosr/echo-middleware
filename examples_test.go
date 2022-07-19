@@ -3,11 +3,13 @@ package middleware_test
 import (
 	"os"
 
-	middleware "github.com/faabiosr/echo-middleware"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/stats/view"
+	"go.uber.org/zap"
+
+	middleware "github.com/faabiosr/echo-middleware"
 )
 
 // This example registers the ZeroLog middleware with default configuration.
@@ -88,4 +90,33 @@ func ExampleOpenCensusWithConfig() {
 	}
 
 	e.Use(middleware.OpenCensusWithConfig(cfg))
+}
+
+// This example registers the ZapLog middleware with default configuration.
+func ExampleZapLog() {
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.ZapLog())
+}
+
+// This example registers the ZapLog middleware with custom configuration.
+func ExampleZapLogWithConfig() {
+	e := echo.New()
+
+	// Custom ZapLog logger instance
+	logger, _ := zap.NewProduction()
+
+	// Middleware
+	logConfig := middleware.ZapLogConfig{
+		Logger: logger,
+		FieldMap: map[string]string{
+			"uri":    "@uri",
+			"host":   "@host",
+			"method": "@method",
+			"status": "@status",
+		},
+	}
+
+	e.Use(middleware.ZapLogWithConfig(logConfig))
 }
