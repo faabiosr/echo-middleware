@@ -43,17 +43,9 @@ type ZeroLogConfig struct {
 
 // DefaultZeroLogConfig is the default ZeroLog middleware config.
 var DefaultZeroLogConfig = ZeroLogConfig{
-	FieldMap: map[string]string{
-		"remote_ip": logRemoteIP,
-		"uri":       logURI,
-		"host":      logHost,
-		"method":    logMethod,
-		"status":    logStatus,
-		"latency":   logLatency,
-		"error":     logError,
-	},
-	Logger:  log.Logger,
-	Skipper: mw.DefaultSkipper,
+	FieldMap: defaultFields,
+	Logger:   log.Logger,
+	Skipper:  mw.DefaultSkipper,
 }
 
 // ZeroLog returns a middleware that logs HTTP requests.

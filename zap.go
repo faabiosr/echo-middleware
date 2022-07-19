@@ -42,15 +42,7 @@ type ZapLogConfig struct {
 
 // DefaultZapLogConfig is the default Uber ZapLog middleware config.
 var DefaultZapLogConfig = ZapLogConfig{
-	FieldMap: map[string]string{
-		"remote_ip": logRemoteIP,
-		"uri":       logURI,
-		"host":      logHost,
-		"method":    logMethod,
-		"status":    logStatus,
-		"latency":   logLatency,
-		"error":     logError,
-	},
+	FieldMap: defaultFields,
 	Logger: func() *zap.Logger {
 		lg, _ := zap.NewProduction()
 		return lg
