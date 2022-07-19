@@ -24,15 +24,17 @@ jobs:
 
     steps:
       - name: checkout the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: setup go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
 
       - name: install golanci-linter
-        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.43.0
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.47.1
 
       - name: run unit tests
         run: make test
@@ -41,7 +43,7 @@ jobs:
         run: make lint
 
       - name: upload code coverage
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.1.0
         if: contains(github.ref, 'master')
         with:
           file: ./cover.out
