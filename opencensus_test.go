@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -10,41 +8,26 @@ import (
 )
 
 func TestOpenCensus(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
-	_ = OpenCensus()(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = OpenCensus()(testHandler)(ec)
 }
 
 func TestOpenCensusWithEmptyConfig(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
-	_ = OpenCensusWithConfig(OpenCensusConfig{})(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = OpenCensusWithConfig(OpenCensusConfig{})(testHandler)(ec)
 }
 
 func TestOpenCensusWithSkipper(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
 	config := DefaultOpenCensusConfig
 	config.Skipper = func(c echo.Context) bool {
 		return true
 	}
 
-	_ = OpenCensusWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = OpenCensusWithConfig(config)(testHandler)(ec)
 }
 
 func TestOpenCensusWithWrongView(t *testing.T) {
@@ -54,16 +37,11 @@ func TestOpenCensusWithWrongView(t *testing.T) {
 		}
 	}()
 
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
 	config := OpenCensusConfig{
 		Views: []*view.View{{}},
 	}
 
-	_ = OpenCensusWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = OpenCensusWithConfig(config)(testHandler)(ec)
 }

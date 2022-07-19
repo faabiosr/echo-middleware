@@ -1,12 +1,8 @@
 package middleware
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -15,54 +11,15 @@ import (
 )
 
 func TestZapLogWithConfig(t *testing.T) {
-	e := echo.New()
-
-	form := url.Values{}
-	form.Add("username", "doejohn")
-
-	req := httptest.NewRequest(echo.POST, "http://some?name=john", strings.NewReader(form.Encode()))
-
-	req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationForm)
-	req.Header.Add("Referer", "http://foo.bar")
-	req.Header.Add("User-Agent", "cli-agent")
-	req.Header.Add(echo.HeaderXForwardedFor, "http://foo.bar")
-	req.Header.Add("user", "admin")
-	req.AddCookie(&http.Cookie{
-		Name:  "session",
-		Value: "A1B2C3",
-	})
-
-	rec := httptest.NewRecorder()
-	rec.Header().Add(echo.HeaderXRequestID, "123")
-
-	ec := e.NewContext(req, rec)
-
-	fields := DefaultZapLogConfig.FieldMap
-	fields["empty"] = ""
-	fields["id"] = logID
-	fields["path"] = logPath
-	fields["protocol"] = logProtocol
-	fields["referer"] = logReferer
-	fields["user_agent"] = logUserAgent
-	fields["store"] = logHeaderPrefix + "store"
-	fields["filter_name"] = logQueryPrefix + "name"
-	fields["username"] = logFormPrefix + "username"
-	fields["session"] = logCookiePrefix + "session"
-	fields["bytes_in"] = logBytesIn
-	fields["bytes_out"] = logBytesOut
-	fields["referer"] = logReferer
-	fields["user"] = logHeaderPrefix + "user"
-
+	ec := postCtx(t)
 	logger, logs := observer.New(zap.InfoLevel)
 
 	config := ZapLogConfig{
 		Logger:   zap.New(logger),
-		FieldMap: fields,
+		FieldMap: testFields,
 	}
 
-	_ = ZapLogWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(ec)
+	_ = ZapLogWithConfig(config)(testHandler)(ec)
 
 	entry := logs.All()[0]
 	ectx := entry.ContextMap()
@@ -101,58 +58,35 @@ func TestZapLogWithConfig(t *testing.T) {
 }
 
 func TestZapLog(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	ec := e.NewContext(req, rec)
-
-	_ = ZapLog()(func(ec echo.Context) error {
-		return ec.String(http.StatusOK, "test")
-	})(ec)
+	ec := reqCtx(t)
+	_ = ZapLog()(testHandler)(ec)
 }
 
 func TestZapLogWithEmptyConfig(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	ec := e.NewContext(req, rec)
-
-	_ = ZapLogWithConfig(ZapLogConfig{})(func(ec echo.Context) error {
-		return ec.String(http.StatusOK, "test")
-	})(ec)
+	ec := reqCtx(t)
+	_ = ZapLogWithConfig(ZapLogConfig{})(testHandler)(ec)
 }
 
 func TestZapLogWithSkipper(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ec := reqCtx(t)
 
 	config := DefaultZapLogConfig
 	config.Skipper = func(c echo.Context) bool {
 		return true
 	}
 
-	_ = ZapLogWithConfig(config)(func(c echo.Context) error {
-		return c.String(http.StatusOK, "test")
-	})(c)
+	_ = ZapLogWithConfig(config)(testHandler)(ec)
 }
 
 func TestZapLogRetrievesAnError(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(echo.GET, "/some", nil)
-	rec := httptest.NewRecorder()
-	ec := e.NewContext(req, rec)
-
+	ec := errCtx(t)
 	logger, logs := observer.New(zap.InfoLevel)
 
 	config := ZapLogConfig{
 		Logger: zap.New(logger),
 	}
 
-	_ = ZapLogWithConfig(config)(func(ec echo.Context) error {
-		return errors.New("error")
-	})(ec)
+	_ = ZapLogWithConfig(config)(testHandler)(ec)
 
 	entry := logs.All()[0]
 	ectx := entry.ContextMap()
