@@ -120,3 +120,23 @@ func ExampleZapLogWithConfig() {
 
 	e.Use(middleware.ZapLogWithConfig(logConfig))
 }
+
+// This example registers the RequestID middleware with default configuration.
+func ExampleRequestID() {
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.RequestID())
+}
+
+// This example registers the RequestID middleware with custom configuration.
+func ExampleRequestIDWithConfig() {
+	e := echo.New()
+
+	// Middleware
+	config := middleware.RequestIDConfig{
+		TargetHeader: echo.HeaderXRequestID,
+	}
+
+	e.Use(middleware.RequestIDWithConfig(config))
+}

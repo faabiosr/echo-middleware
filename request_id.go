@@ -13,9 +13,12 @@ type ctxkey struct{ name string }
 // reqIDKey key used to store the request-id in context.
 var reqIDKey = &ctxkey{"request-id"}
 
+// RequestIDConfig alias for emw.RequestIDConfig
+type RequestIDConfig = emw.RequestIDConfig
+
 // DefaultRequestIDConfig is the default RequestID middleware config, based on
 // the echo.RequestIDConfig but with uuid generator instead.
-var DefaultRequestIDConfig = emw.RequestIDConfig{
+var DefaultRequestIDConfig = RequestIDConfig{
 	Skipper:          emw.DefaultSkipper,
 	Generator:        uuidGen,
 	RequestIDHandler: requestIDHandler,
@@ -30,7 +33,7 @@ func RequestID() echo.MiddlewareFunc {
 
 // RequestIDWithConfig uses the echo.RequestIDWithConfig under the hood with
 // custom generator and sets the request id in context.
-func RequestIDWithConfig(cfg emw.RequestIDConfig) echo.MiddlewareFunc {
+func RequestIDWithConfig(cfg RequestIDConfig) echo.MiddlewareFunc {
 	// Defaults
 	if cfg.Skipper == nil {
 		cfg.Skipper = emw.DefaultRequestIDConfig.Skipper
