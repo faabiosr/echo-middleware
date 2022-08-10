@@ -4,13 +4,12 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	emw "github.com/labstack/echo/v4/middleware"
 )
 
 func TestRequestIDWithConfig(t *testing.T) {
 	ec := reqCtx(t)
 
-	cfg := emw.RequestIDConfig{}
+	cfg := RequestIDConfig{}
 	_ = RequestIDWithConfig(cfg)(testHandler)(ec)
 
 	rid := RequestIDValue(ec.Request().Context())
