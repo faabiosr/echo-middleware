@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/gofrs/uuid v4.2.0+incompatible
-	github.com/labstack/echo/v4 v4.7.2
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/rs/zerolog v1.27.0
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.23.0
