@@ -1,6 +1,6 @@
 module github.com/faabiosr/echo-middleware
 
-go 1.17
+go 1.18
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -8,7 +8,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.24.0
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.24.0
 )
 
 require (
