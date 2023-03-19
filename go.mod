@@ -3,7 +3,7 @@ module github.com/faabiosr/echo-middleware
 go 1.18
 
 require (
-	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/rs/zerolog v1.29.0
 	github.com/sirupsen/logrus v1.9.0
