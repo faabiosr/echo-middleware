@@ -3,6 +3,7 @@ package middleware_test
 import (
 	"os"
 
+	charm "github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/sirupsen/logrus"
@@ -119,6 +120,32 @@ func ExampleZapLogWithConfig() {
 	}
 
 	e.Use(middleware.ZapLogWithConfig(logConfig))
+}
+
+// This example registers the CharmBracelet Log middleware with default configuration.
+func ExampleCharmLog() {
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.CharmLog())
+}
+
+// This example registers the CharmBracelet Log middleware with custom configuration.
+func ExampleCharmLogWithConfig() {
+	e := echo.New()
+
+	// Middleware
+	logConfig := middleware.CharmLogConfig{
+		Logger: charm.Default(),
+		FieldMap: map[string]string{
+			"uri":    "@uri",
+			"host":   "@host",
+			"method": "@method",
+			"status": "@status",
+		},
+	}
+
+	e.Use(middleware.CharmLogWithConfig(logConfig))
 }
 
 // This example registers the RequestID middleware with default configuration.
