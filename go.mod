@@ -10,6 +10,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	go.opencensus.io v0.24.0
 	go.uber.org/zap v1.24.0
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
 require (

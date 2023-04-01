@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/stats/view"
 	"go.uber.org/zap"
+	"golang.org/x/exp/slog"
 
 	middleware "github.com/faabiosr/echo-middleware"
 )
@@ -122,7 +123,8 @@ func ExampleZapLogWithConfig() {
 	e.Use(middleware.ZapLogWithConfig(logConfig))
 }
 
-// This example registers the CharmBracelet Log middleware with default configuration.
+// This example registers the CharmBracelet Log middleware with default
+// configuration.
 func ExampleCharmLog() {
 	e := echo.New()
 
@@ -130,7 +132,8 @@ func ExampleCharmLog() {
 	e.Use(middleware.CharmLog())
 }
 
-// This example registers the CharmBracelet Log middleware with custom configuration.
+// This example registers the CharmBracelet Log middleware with custom
+// configuration.
 func ExampleCharmLogWithConfig() {
 	e := echo.New()
 
@@ -146,6 +149,34 @@ func ExampleCharmLogWithConfig() {
 	}
 
 	e.Use(middleware.CharmLogWithConfig(logConfig))
+}
+
+// This example registers the golang Structured Log middleware with default
+// configuration.
+func ExampleSLog() {
+	e := echo.New()
+
+	// Middleware
+	e.Use(middleware.SLog())
+}
+
+// This example registers the golang Structured Log middleware with custom
+// configuration.
+func ExampleSLogWithConfig() {
+	e := echo.New()
+
+	// Middleware
+	logConfig := middleware.SLogConfig{
+		Logger: slog.Default(),
+		FieldMap: map[string]string{
+			"uri":    "@uri",
+			"host":   "@host",
+			"method": "@method",
+			"status": "@status",
+		},
+	}
+
+	e.Use(middleware.SLogWithConfig(logConfig))
 }
 
 // This example registers the RequestID middleware with default configuration.
