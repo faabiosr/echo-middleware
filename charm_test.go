@@ -14,7 +14,7 @@ func TestCharmLogWithConfig(t *testing.T) {
 	b := new(bytes.Buffer)
 
 	config := CharmLogConfig{
-		Logger:   charm.New(charm.WithOutput(b)),
+		Logger:   charm.New(b),
 		FieldMap: testFields,
 	}
 
@@ -78,7 +78,7 @@ func TestCharmLogRetrievesAnError(t *testing.T) {
 	b := new(bytes.Buffer)
 
 	config := CharmLogConfig{
-		Logger:   charm.New(charm.WithOutput(b)),
+		Logger:   charm.New(b),
 		FieldMap: testFields,
 	}
 
