@@ -34,7 +34,7 @@ type CharmLogConfig struct {
 	FieldMap map[string]string
 
 	// Logger it is a charm logger
-	Logger charm.Logger
+	Logger *charm.Logger
 
 	// Skipper defines a function to skip middleware.
 	Skipper mw.Skipper
