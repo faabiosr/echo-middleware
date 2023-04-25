@@ -16,6 +16,7 @@ const (
 	logHost         = "@host"
 	logMethod       = "@method"
 	logPath         = "@path"
+	logRoute        = "@route"
 	logProtocol     = "@protocol"
 	logReferer      = "@referer"
 	logUserAgent    = "@user_agent"
@@ -119,6 +120,7 @@ func mapTags(ec echo.Context, latency time.Duration) map[string]interface{} {
 	}
 
 	tags[logPath] = path
+	tags[logRoute] = ec.Path()
 	tags[logProtocol] = req.Proto
 	tags[logReferer] = req.Referer()
 	tags[logUserAgent] = req.UserAgent()
