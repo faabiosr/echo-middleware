@@ -19,6 +19,7 @@ type ZeroLogConfig struct {
 	// - @host
 	// - @method
 	// - @path
+	// - @route
 	// - @protocol
 	// - @referer
 	// - @user_agent
