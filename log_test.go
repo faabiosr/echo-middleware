@@ -22,6 +22,7 @@ var testFields = map[string]string{
 	"empty":         "",
 	"id":            logID,
 	"path":          logPath,
+	"route":         logRoute,
 	"protocol":      logProtocol,
 	"referer":       logReferer,
 	"user_agent":    logUserAgent,
@@ -67,7 +68,9 @@ func postCtx(t *testing.T) echo.Context {
 	form := url.Values{}
 	form.Add("username", "doejohn")
 
-	req := httptest.NewRequest(echo.POST, "http://some?name=john", strings.NewReader(form.Encode()))
+	u, _ := url.Parse("http://some/foo/456?name=john")
+
+	req := httptest.NewRequest(echo.POST, u.String(), strings.NewReader(form.Encode()))
 
 	req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationForm)
 	req.Header.Add("Referer", "http://foo.bar")
@@ -83,5 +86,12 @@ func postCtx(t *testing.T) echo.Context {
 	rec.Header().Add(echo.HeaderXRequestID, "123")
 
 	e := echo.New()
-	return e.NewContext(req, rec)
+
+	e.Add(echo.GET, "/foo/:id", testHandler)
+
+	ec := e.NewContext(req, rec)
+
+	e.Router().Find(echo.GET, u.RequestURI(), ec)
+
+	return ec
 }
