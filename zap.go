@@ -18,6 +18,7 @@ type ZapLogConfig struct {
 	// - @host
 	// - @method
 	// - @path
+	// - @route
 	// - @protocol
 	// - @referer
 	// - @user_agent
