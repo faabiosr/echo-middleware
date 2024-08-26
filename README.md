@@ -7,12 +7,12 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/echo-middleware/blob/master/LICENSE)
 
 ## Description
-echo-middleware is a Go package that provides multiple middleware for Echo Framework.
+echo-middleware is a Go package that provides multiple middlewares for Echo Framework.
 
 ## Requirements
-Echo Middlewares requires Go 1.19 or later and Echo Framework v4.
+echo-middleware requires Go 1.19 or later and Echo Framework v4.
 
-## Instalation
+## Installation
 Use go get.
 ```sh
 $ go get github.com/faabiosr/echo-middleware
