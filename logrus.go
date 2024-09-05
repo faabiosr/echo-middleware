@@ -87,3 +87,14 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 		}
 	}
 }
+
+// LogrusRecoverFn returns a Logrus recover log function to print panic errors.
+func LogrusRecoverFn(logger *logrus.Logger) mw.LogErrorFunc {
+	return func(_ echo.Context, err error, stack []byte) error {
+		logger.WithField("stacktrace", string(stack)).
+			WithError(err).
+			Error("panic recover")
+
+		return err
+	}
+}

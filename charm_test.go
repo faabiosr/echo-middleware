@@ -13,6 +13,7 @@ import (
 
 	charm "github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
+	emw "github.com/labstack/echo/v4/middleware"
 )
 
 func TestCharmLogWithConfig(t *testing.T) {
@@ -100,6 +101,34 @@ func TestCharmLogRetrievesAnError(t *testing.T) {
 	}
 
 	if !strings.Contains(res, `error=error`) {
+		t.Errorf("invalid log: error not found")
+	}
+}
+
+func TestCharmLogRecoverFn(t *testing.T) {
+	ec := panicCtx(t)
+	b := new(bytes.Buffer)
+
+	logger := charm.New(b)
+
+	rec := emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: CharmLogRecoverFn(logger),
+	})
+
+	config := CharmLogConfig{
+		Logger:   logger,
+		FieldMap: testFields,
+	}
+
+	_ = CharmLogWithConfig(config)(rec(testHandler))(ec)
+
+	res := b.String()
+
+	if !strings.Contains(res, "status=500") {
+		t.Errorf("invalid log: wrong status code")
+	}
+
+	if !strings.Contains(res, `error="unable to call"`) {
 		t.Errorf("invalid log: error not found")
 	}
 }

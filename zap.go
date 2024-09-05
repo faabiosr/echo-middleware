@@ -97,3 +97,15 @@ func ZapLogWithConfig(cfg ZapLogConfig) echo.MiddlewareFunc {
 		}
 	}
 }
+
+// ZapLogRecoverFn returns a ZapLog recover log function to print panic errors.
+func ZapLogRecoverFn(logger *zap.Logger) mw.LogErrorFunc {
+	return func(_ echo.Context, err error, stack []byte) error {
+		logger.With(
+			zap.ByteString("stacktrace", stack),
+			zap.Error(err),
+		).Error("panic recover")
+
+		return err
+	}
+}

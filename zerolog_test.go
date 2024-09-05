@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	emw "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -99,6 +100,32 @@ func TestZeroLogRetrievesAnError(t *testing.T) {
 	}
 
 	if !strings.Contains(res, `error=error`) {
+		t.Errorf("invalid log: error not found")
+	}
+}
+
+func TestZeroLogRecoverFn(t *testing.T) {
+	ec := panicCtx(t)
+	b := new(bytes.Buffer)
+	logger := log.Output(zerolog.ConsoleWriter{Out: b, NoColor: true})
+
+	rec := emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: ZeroLogRecoverFn(logger),
+	})
+
+	config := ZeroLogConfig{
+		Logger: logger,
+	}
+
+	_ = ZeroLogWithConfig(config)(rec(testHandler))(ec)
+
+	res := b.String()
+
+	if !strings.Contains(res, "status=500") {
+		t.Errorf("invalid log: wrong status code")
+	}
+
+	if !strings.Contains(res, `error="unable to call"`) {
 		t.Errorf("invalid log: error not found")
 	}
 }

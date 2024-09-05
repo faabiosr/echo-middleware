@@ -93,3 +93,17 @@ func CharmLogWithConfig(cfg CharmLogConfig) echo.MiddlewareFunc {
 		}
 	}
 }
+
+// CharmLogRecoverFn returns a CharmLog recover log function to print panic
+// errors.
+func CharmLogRecoverFn(logger *charm.Logger) mw.LogErrorFunc {
+	return func(_ echo.Context, err error, stack []byte) error {
+		logger.Error(
+			"panic recover",
+			"stacktrace", string(stack),
+			"error", err,
+		)
+
+		return err
+	}
+}

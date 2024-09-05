@@ -46,6 +46,10 @@ func testHandler(ec echo.Context) error {
 		return errors.New("error")
 	}
 
+	if v := ec.QueryParam("panic"); v != "" {
+		panic("unable to call")
+	}
+
 	return ec.String(http.StatusOK, "test")
 }
 
@@ -99,4 +103,8 @@ func postCtx(t *testing.T) echo.Context {
 	e.Router().Find(echo.GET, u.RequestURI(), ec)
 
 	return ec
+}
+
+func panicCtx(t *testing.T) echo.Context {
+	return testCtx(t, "/some?panic=1")
 }

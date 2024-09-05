@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	emw "github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )
@@ -103,5 +104,35 @@ func TestZapLogRetrievesAnError(t *testing.T) {
 
 	if _, ok := ectx["error"]; !ok {
 		t.Errorf("invalid log: error not found")
+	}
+}
+
+func TestZapLogRecoverFn(t *testing.T) {
+	ec := panicCtx(t)
+	obsLog, logs := observer.New(zap.InfoLevel)
+	logger := zap.New(obsLog)
+
+	rec := emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: ZapLogRecoverFn(logger),
+	})
+
+	config := ZapLogConfig{
+		Logger: logger,
+	}
+
+	_ = ZapLogWithConfig(config)(rec(testHandler))(ec)
+
+	entry := logs.All()[0]
+	ectx := entry.ContextMap()
+
+	if _, ok := ectx["error"]; !ok {
+		t.Errorf("invalid log: error not found")
+	}
+
+	entry = logs.All()[1]
+	ectx = entry.ContextMap()
+
+	if ectx["status"] != int64(http.StatusInternalServerError) {
+		t.Errorf("invalid log: wrong status code")
 	}
 }
