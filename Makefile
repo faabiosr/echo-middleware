@@ -1,32 +1,29 @@
-.DEFAULT_GOAL := test
+.DEFAULT_GOAL := help
 
-# Clean up
-clean:
-	@rm -fR ./vendor/ ./cover.*
 .PHONY: clean
+clean: ## clean up files generate by coverage or go mod
+	@rm -fR ./vendor/ ./cover.*
 
-# Download project dependencies
-configure:
-	@GO111MODULE=on go mod download
-.PHONY: configure
-
-# Run tests and generates html coverage file
-cover: test
+.PHONY: cover
+cover: test ## run tests and generates the html coverage file
 	@go tool cover -html=./cover.out -o ./cover.html
 	@test -f ./cover.out && rm ./cover.out;
-.PHONY: cover
 
-# Format all go files
-fmt:
-	@gofmt -s -w -l $(shell go list -f {{.Dir}} ./...)
-.PHONY: fmt
+.PHONY: help
+help: ## display help screen
+	@echo "Usage: make <target>"
+	@echo ""
+	@sed \
+		-e '/^[a-zA-Z0-9_\-]*:.*##/!d' \
+		-e 's/:.*##\s*/:/' \
+		-e 's/^\(.\+\):\(.*\)/$(shell tput setaf 6)\1$(shell tput sgr0):\2/' \
+		$(MAKEFILE_LIST) | column -c2 -t -s :
+	@echo ''
 
-# Run linters
-lint:
-	@golangci-lint run ./...
 .PHONY: lint
+lint: # golang linters (golangci-lint)
+	@golangci-lint run ./...
 
-# Run tests
-test:
-	@go test -v -coverprofile=./cover.out -covermode=atomic $(shell go list ./...)
 .PHONY: test
+test: ## run tests
+	@go test -v -coverprofile=./cover.out -covermode=atomic $(shell go list ./...)
