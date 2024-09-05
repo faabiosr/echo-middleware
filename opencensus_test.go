@@ -23,7 +23,7 @@ func TestOpenCensusWithSkipper(t *testing.T) {
 	ec := reqCtx(t)
 
 	config := DefaultOpenCensusConfig
-	config.Skipper = func(c echo.Context) bool {
+	config.Skipper = func(echo.Context) bool {
 		return true
 	}
 
