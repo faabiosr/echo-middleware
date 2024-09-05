@@ -95,22 +95,22 @@ func OpenCensusWithConfig(cfg OpenCensusConfig) echo.MiddlewareFunc {
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) (err error) {
-			if cfg.Skipper(ctx) {
-				return next(ctx)
+		return func(ec echo.Context) (err error) {
+			if cfg.Skipper(ec) {
+				return next(ec)
 			}
 
 			handler := &ochttp.Handler{
 				Handler: http.HandlerFunc(
 					func(w http.ResponseWriter, r *http.Request) {
-						ctx.SetRequest(r)
-						ctx.SetResponse(echo.NewResponse(w, ctx.Echo()))
-						err = next(ctx)
+						ec.SetRequest(r)
+						ec.SetResponse(echo.NewResponse(w, ec.Echo()))
+						err = next(ec)
 					},
 				),
 			}
 
-			handler.ServeHTTP(ctx.Response(), ctx.Request())
+			handler.ServeHTTP(ec.Response(), ec.Request())
 
 			return
 		}
