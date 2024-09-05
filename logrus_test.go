@@ -70,7 +70,7 @@ func TestLogrusWithSkipper(t *testing.T) {
 	ec := reqCtx(t)
 
 	config := DefaultLogrusConfig
-	config.Skipper = func(c echo.Context) bool {
+	config.Skipper = func(echo.Context) bool {
 		return true
 	}
 

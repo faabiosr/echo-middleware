@@ -72,7 +72,7 @@ func TestZapLogWithSkipper(t *testing.T) {
 	ec := reqCtx(t)
 
 	config := DefaultZapLogConfig
-	config.Skipper = func(c echo.Context) bool {
+	config.Skipper = func(echo.Context) bool {
 		return true
 	}
 

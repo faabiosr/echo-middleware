@@ -67,7 +67,7 @@ func TestCharmLogWithSkipper(t *testing.T) {
 	ec := reqCtx(t)
 
 	config := DefaultCharmLogConfig
-	config.Skipper = func(c echo.Context) bool {
+	config.Skipper = func(echo.Context) bool {
 		return true
 	}
 

@@ -69,7 +69,7 @@ func TestZeroLogWithSkipper(t *testing.T) {
 	ec := reqCtx(t)
 
 	config := DefaultZeroLogConfig
-	config.Skipper = func(c echo.Context) bool {
+	config.Skipper = func(echo.Context) bool {
 		return true
 	}
 
