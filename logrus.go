@@ -75,12 +75,12 @@ func LogrusWithConfig(cfg LogrusConfig) echo.MiddlewareFunc {
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) (err error) {
-			if cfg.Skipper(ctx) {
-				return next(ctx)
+		return func(ec echo.Context) (err error) {
+			if cfg.Skipper(ec) {
+				return next(ec)
 			}
 
-			logFields, err := mapFields(ctx, next, cfg.FieldMap)
+			logFields, err := mapFields(ec, next, cfg.FieldMap)
 			cfg.Logger.WithFields(logFields).Print("handle request")
 
 			return
