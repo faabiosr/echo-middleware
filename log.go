@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Fabio da Silva Ribeiro <faabiosr@gmail.com>
+ * SPDX-License-Identifier: MIT
+ */
+
 package middleware
 
 import (
