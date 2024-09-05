@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/log v0.2.5
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/rs/zerolog v1.31.0
+	github.com/rs/zerolog v1.33.0
 	github.com/sirupsen/logrus v1.9.3
 	go.opencensus.io v0.24.0
 	go.uber.org/zap v1.27.0
