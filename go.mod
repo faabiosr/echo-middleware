@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/charmbracelet/log v0.2.5
-	github.com/gofrs/uuid/v5 v5.0.0
+	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/rs/zerolog v1.31.0
 	github.com/sirupsen/logrus v1.9.3
