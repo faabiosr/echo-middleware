@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -27,7 +28,7 @@ func TestCharmLogWithConfig(t *testing.T) {
 		{"handle request", "invalid log: handle request info not found"},
 		{"id=123", "invalid log: request id not found"},
 		{`remote_ip=http://foo.bar`, "invalid log: remote ip not found"},
-		{`uri=http://some/foo/456?name=john`, "invalid log: uri not found"},
+		{`uri="http://some/foo/456?name=john"`, "invalid log: uri not found"},
 		{"host=some", "invalid log: host not found"},
 		{"method=POST", "invalid log: method not found"},
 		{"status=200", "invalid log: status not found"},
@@ -45,6 +46,8 @@ func TestCharmLogWithConfig(t *testing.T) {
 		{"username=doejohn", "invalid log: form field username not found"},
 		{"session=A1B2C3", "invalid log: cookie session not found"},
 	}
+
+	fmt.Println(b.String())
 
 	for _, test := range tests {
 		if !strings.Contains(b.String(), test.str) {
