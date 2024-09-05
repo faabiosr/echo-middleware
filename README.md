@@ -6,13 +6,18 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/echo-middleware?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/echo-middleware)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/echo-middleware/blob/master/LICENSE)
 
-## Description
+## :tada: Overview
 echo-middleware is a Go package that provides multiple middlewares for Echo Framework.
 
-## Requirements
-echo-middleware requires Go 1.19 or later and Echo Framework v4.
+## :relaxed: Motivation
+After writing these middlewares several times, it was decided to create a package with useful middlewares for echo.
 
-## Installation
+## :dart: Installation
+
+### Requirements
+echo-middleware requires Go 1.21 or later and Echo Framework v4.
+
+### How to use
 Use go get.
 ```sh
 $ go get github.com/faabiosr/echo-middleware
@@ -23,28 +28,14 @@ Then import the package into your own code:
 import "github.com/faabiosr/echo-middleware"
 ```
 
-## Development
+## :toolbox: Development
 
 ### Requirements
 - Install [Go](https://golang.org)
+- Install [GolangCI-Lint](https://github.com/golangci/golangci-lint#install)
 
 ### Makefile
-```sh
-# Clean up
-$ make clean
+Please run `make help` to see all the available targets.
 
-# Download project dependencies
-$ make configure
-
-# Run tests and generates html coverage file
-$ make cover
-
-# Format all go files
-$ make fmt
-
-# Run tests
-$make test
-```
-
-## License
+## :page_with_curl: License
 This project is released under the MIT licence. See [LICENSE](https://github.com/faabiosr/echo-middleware/blob/master/LICENSE) for more details.
