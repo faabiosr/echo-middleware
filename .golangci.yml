@@ -1,0 +1,25 @@
+---
+run:
+  timeout: "120s"
+
+linters:
+  enable:
+    - gocyclo
+    - unconvert
+    - goimports
+    - unused
+    - misspell
+    - nakedret
+    - errcheck
+    - revive
+    - ineffassign
+    - goconst
+    - govet
+    - unparam
+    - gofumpt
+    - prealloc
+    - mnd
+    - gocritic
+
+issues:
+  exclude-use-default: false
