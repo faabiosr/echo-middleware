@@ -87,3 +87,18 @@ func ZeroLogWithConfig(cfg ZeroLogConfig) echo.MiddlewareFunc {
 		}
 	}
 }
+
+// ZeroLogRecoverFn returns a ZeroLog recover log function to print panic
+// errors.
+func ZeroLogRecoverFn(logger zerolog.Logger) mw.LogErrorFunc {
+	return func(_ echo.Context, err error, stack []byte) error {
+		logger.Error().
+			Err(err).
+			Fields(map[string]interface{}{
+				"stacktrace": stack,
+			}).
+			Msg("panic recover")
+
+		return err
+	}
+}

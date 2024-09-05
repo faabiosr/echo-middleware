@@ -10,6 +10,7 @@ import (
 
 	charm "github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
+	emw "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/stats/view"
@@ -47,6 +48,20 @@ func ExampleZeroLogWithConfig() {
 	e.Use(middleware.ZeroLogWithConfig(logConfig))
 }
 
+// This example register the ZeroLog log error function to echo middleware
+// Recover.
+func ExampleZeroLogRecoverFn() {
+	e := echo.New()
+
+	// Custom zerolog logger instance
+	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+
+	// Middleware
+	e.Use(emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: middleware.ZeroLogRecoverFn(logger),
+	}))
+}
+
 // This example registers the Logrus middleware with default configuration.
 func ExampleLogrus() {
 	e := echo.New()
@@ -74,6 +89,20 @@ func ExampleLogrusWithConfig() {
 	}
 
 	e.Use(middleware.LogrusWithConfig(logConfig))
+}
+
+// This example register the Logrus log error function to echo middleware
+// Recover.
+func ExampleLogrusRecoverFn() {
+	e := echo.New()
+
+	// Custom logrus logger instance
+	logger := logrus.New()
+
+	// Middleware
+	e.Use(emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: middleware.LogrusRecoverFn(logger),
+	}))
 }
 
 // This example registers the OpenCensus middleware with default configuration.
@@ -127,6 +156,20 @@ func ExampleZapLogWithConfig() {
 	e.Use(middleware.ZapLogWithConfig(logConfig))
 }
 
+// This example register the ZapLog log error function to echo middleware
+// Recover.
+func ExampleZapLogRecoverFn() {
+	e := echo.New()
+
+	// Custom ZapLog logger instance
+	logger, _ := zap.NewProduction()
+
+	// Middleware
+	e.Use(emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: middleware.ZapLogRecoverFn(logger),
+	}))
+}
+
 // This example registers the CharmBracelet Log middleware with default configuration.
 func ExampleCharmLog() {
 	e := echo.New()
@@ -151,6 +194,17 @@ func ExampleCharmLogWithConfig() {
 	}
 
 	e.Use(middleware.CharmLogWithConfig(logConfig))
+}
+
+// This example register the CharmLog log error function to echo middleware
+// Recover.
+func ExampleCharmLogRecoverFn() {
+	e := echo.New()
+
+	// Middleware
+	e.Use(emw.RecoverWithConfig(emw.RecoverConfig{
+		LogErrorFunc: middleware.CharmLogRecoverFn(charm.Default()),
+	}))
 }
 
 // This example registers the RequestID middleware with default configuration.
